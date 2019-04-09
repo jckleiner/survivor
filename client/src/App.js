@@ -44,15 +44,15 @@ class Game {
   constructor(ctx) {
     console.log('initializing...');
     this.ctx = ctx;
-    this.load();
+    this.init();
   };
 
   // güncelleme ve ekrana yazdırma
-  load = async () => {
+  init = async () => {
     console.log('loading...');
 
-    const tile0 = await this.loadImage('.assets/tiles/0.png');
-    const tile1 = await this.loadImage('.assets/tiles/1.png');
+    const tile0 = await this.loadImage('assets/tiles/0.png');
+    const tile1 = await this.loadImage('assets/tiles/1.png');
 
     this.images = {
       0: tile0, 
@@ -85,8 +85,11 @@ class Game {
   draw = () => {
     console.log('drawing...');
     this.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    this.ctx.fillStyle = '#ccc'
-    this.ctx.fillRect(0, 0, 100, 100);
+
+    this.ctx.drawImage(this.images[0], 0, 0, TILE_WIDTH, TILE_HEIGHT, 100, 100, TILE_WIDTH, TILE_HEIGHT);
+
+     // this.ctx.fillStyle = '#ccc'
+     // this.ctx.fillRect(0, 0, 100, 100);
 
 
     // TODO: draw every user to the screen
@@ -95,6 +98,12 @@ class Game {
   };
 
 };
+
+
+
+
+
+
 
 class App extends Component {
 
@@ -105,13 +114,18 @@ class App extends Component {
     this.state = {
       // where the users screen is
       CURRENT_STEP: '',
+      isGameRunning: false,
     };
     this.lastLoop = null;
   }
 
-  start = () => {
-    this.game = new Game(this.getCtx());
-    this.loop();
+  start = async () => {
+    if(!this.state.isGameRunning) {
+      this.game = new Game(this.getCtx());
+      await this.game.init();
+      this.loop();
+    }
+      this.setState(state => ({isGameRunning: !state.isGameRunning}));
   }
 
   loop = () => {
@@ -126,7 +140,10 @@ class App extends Component {
       this.game.draw();
 
       this.lastLoop = Date.now();
-      this.loop();
+
+      if (this.state.isGameRunning) {
+        this.loop();
+      }
     });
 
   }
@@ -140,7 +157,7 @@ class App extends Component {
     return (
       <div style={{height: '100%', backgroundColor: 'black', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
         
-        <button onClick={this.start}>START
+        <button onClick={this.start}> START
 
         </button>
 
