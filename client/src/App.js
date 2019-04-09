@@ -25,31 +25,26 @@ class Game {
 
   images = {};
 
-  layers= [
+  layers = [
     [
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+      1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+      1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+      1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+      1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+      1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+      1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1
     ]
-
   ];
 
   constructor(ctx) {
-    console.log('initializing...');
     this.ctx = ctx;
     this.init();
   };
 
   // güncelleme ve ekrana yazdırma
   init = async () => {
-    console.log('loading...');
 
     const tile0 = await this.loadImage('assets/tiles/0.png');
     const tile1 = await this.loadImage('assets/tiles/1.png');
@@ -79,14 +74,31 @@ class Game {
   };
   
   update = () => {
-    console.log('updating...');
   };
   
   draw = () => {
-    console.log('drawing...');
     this.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    this.ctx.drawImage(this.images[0], 0, 0, TILE_WIDTH, TILE_HEIGHT, 100, 100, TILE_WIDTH, TILE_HEIGHT);
+    const cols = CANVAS_WIDTH / TILE_WIDTH;
+    const rows = CANVAS_HEIGHT / TILE_HEIGHT;
+
+    
+     
+
+    for (var i = 0; i < this.layers.length; i++) {
+      const layer = this.layers[i];
+      
+      for (var j = 0; j < rows; j++) {
+        for (var k = 0; k < cols; k++) {
+          const image = this.images[layer[(j * cols) + k]];
+          this.ctx.drawImage(
+            image, 0, 0, TILE_WIDTH, TILE_HEIGHT, k * TILE_WIDTH, j*TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT);
+        }
+      }
+    }
+
+
+    //this.ctx.drawImage(this.images[0], 0, 0, TILE_WIDTH, TILE_HEIGHT, 0, 0, TILE_WIDTH, TILE_HEIGHT);
 
      // this.ctx.fillStyle = '#ccc'
      // this.ctx.fillRect(0, 0, 100, 100);
