@@ -9,38 +9,57 @@ const TILE_HEIGHT = 64;
 
 
 
-const Player = {
-  x: 0,
-  y: 0,
-  dirx: 0,
-  diry: 0,
-  health: 100,
-  coins: 0,
-  bullets: 0,
-  medkits:0,
+class Player {
 
-};
+  constructor(ctx, game) {
+    this.x = 100;
+    this.y = 100;
+    this.dirx = 0;
+    this.diry = 0;
+    this.health = 100;
+    this.coins = 0;
+    this.bullets = 0;
+    this.medkits = 0;
+    this.ctx = ctx;
+    this.game = game;
+  }
+
+  update = () => {
+    this.x = this.x + this.dirx * 5;
+    this.y = this.y + this.diry * 5;
+  }
+
+  draw = () => {
+
+  this.ctx.drawImage(this.game.images.user0, 0, 0, TILE_WIDTH, TILE_HEIGHT, this.x, this.y, TILE_WIDTH, TILE_HEIGHT);
+
+  //this.ctx.fillStyle = '#ccc'
+  //this.ctx.fillRect(0, 0, 100, 100);
+
+  }
+}
 
 class Game {
-
-  images = {};
-
-  layers = [
-    [
-      1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-      1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-      1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-      1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-      1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-      1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-      1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-      1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-    ]
-  ];
 
   constructor(ctx) {
     this.ctx = ctx;
     this.init();
+    this.images = {};
+    this.layers = [
+      [
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+      ]
+    ];
+    this.players = [
+      new Player(ctx, this)
+    ];
   };
 
   // güncelleme ve ekrana yazdırma
@@ -48,12 +67,51 @@ class Game {
 
     const tile0 = await this.loadImage('assets/tiles/0.png');
     const tile1 = await this.loadImage('assets/tiles/1.png');
+    const user0 = await this.loadImage('assets/users/0.png');
 
     this.images = {
       0: tile0, 
-      1: tile1
+      1: tile1,
+      user0: user0
     }
+
+    window.addEventListener('keydown', this.onKeyDown);
+    window.addEventListener('keyup', this.onKeyUp);
   };
+
+  onKeyDown = event => {
+    const keyCode = event.keyCode;
+    console.log('key down');
+
+    // LEFT
+    if (keyCode === 37) {
+      this.players[0].dirx = -1;
+    }
+    // RIGHT
+    if (keyCode === 39) {
+      this.players[0].dirx = 1;
+    }
+    // UP
+    if (keyCode === 38) {
+      this.players[0].diry = -1;
+    }
+    // DOWN
+    if (keyCode === 40) {
+      this.players[0].diry = 1;
+    }
+  }
+
+  onKeyUp = event => {
+    const keyCode = event.keyCode;
+
+    console.log('key up');
+    if (keyCode === 37 || keyCode === 39) {
+      this.players[0].dirx = 0;
+    }
+    if (keyCode === 38 || keyCode === 40) {
+      this.players[0].diry = 0;
+    }
+  }
 
   // loads an image to memory using js and returns that image.
   loadImage = (src) => {
@@ -73,17 +131,18 @@ class Game {
     return d;
   };
   
-  update = () => {
+  update = ()   => {  
+    for (var i = 0; i < this.players.length; i++) {
+      const player = this.players[i];
+      player.update();
+    } 
+
   };
   
   draw = () => {
     this.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
     const cols = CANVAS_WIDTH / TILE_WIDTH;
     const rows = CANVAS_HEIGHT / TILE_HEIGHT;
-
-    
-     
 
     for (var i = 0; i < this.layers.length; i++) {
       const layer = this.layers[i];
@@ -97,6 +156,10 @@ class Game {
       }
     }
 
+    for (var m = 0; m < this.players.length; m++) {
+      const player = this.players[m];
+      player.draw();
+    }
 
     //this.ctx.drawImage(this.images[0], 0, 0, TILE_WIDTH, TILE_HEIGHT, 0, 0, TILE_WIDTH, TILE_HEIGHT);
 
@@ -135,17 +198,19 @@ class App extends Component {
     if(!this.state.isGameRunning) {
       this.game = new Game(this.getCtx());
       await this.game.init();
+      document.onkeydown = this.game.checkKey;
       this.loop();
     }
       this.setState(state => ({isGameRunning: !state.isGameRunning}));
   }
+
 
   loop = () => {
     // requestAnimationFrame uses the GPU more???
     requestAnimationFrame(() => {
       const now = Date.now();
 
-      if (now - this.lastLoop > (1000 / 30)) {
+      if (now - this.lastLoop > (1000 / 60)) {
         this.game.update();
       }
 
@@ -159,11 +224,8 @@ class App extends Component {
     });
 
   }
-  
 
   getCtx = () => this.canvasRef.current.getContext('2d');
-
-
 
   render() {
     return (
@@ -173,7 +235,7 @@ class App extends Component {
 
         </button>
 
-        <canvas ref={this.canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT}>
+        <canvas tabindex='1' ref={this.canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT}>
 
          
         </canvas>
