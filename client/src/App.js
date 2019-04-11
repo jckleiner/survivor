@@ -6,7 +6,7 @@ const CANVAS_WIDTH = 640;
 const CANVAS_HEIGHT = 512;
 const TILE_WIDTH = 64;
 const TILE_HEIGHT = 64;
-
+ 
 
 
 class Player {
@@ -16,6 +16,8 @@ class Player {
     this.y = 100;
     this.dirx = 0;
     this.diry = 0;
+    this.targetX= 100;
+    this.targetY= 100;
     this.health = 100;
     this.coins = 0;
     this.bullets = 0;
@@ -25,13 +27,21 @@ class Player {
   }
 
   update = () => {
-    this.x = this.x + this.dirx * 5;
-    this.y = this.y + this.diry * 5;
+    this.targetX = this.targetX + this.dirx * 3;
+    this.targetY = this.targetY + this.diry * 3;
+
+    // current position
+    this.x = this.x + (this.targetX - this.x) * 0.5;
+    this.y = this.y + (this.targetY - this.y) * 0.5;
+    
+
+    // this.x = this.x + this.dirx * 5;
+    // this.y = this.y + this.diry * 5;
   }
 
   draw = () => {
 
-  this.ctx.drawImage(this.game.images.user0, 0, 0, TILE_WIDTH, TILE_HEIGHT, this.x, this.y, TILE_WIDTH, TILE_HEIGHT);
+  this.ctx.drawImage(this.game.images.user0, 0, 0, TILE_WIDTH, TILE_HEIGHT, this.targetX, this.targetY, TILE_WIDTH, TILE_HEIGHT);
 
   //this.ctx.fillStyle = '#ccc'
   //this.ctx.fillRect(0, 0, 100, 100);
@@ -88,7 +98,7 @@ class Game {
       this.players[0].dirx = -1;
     }
     // RIGHT
-    if (keyCode === 39) {
+    else if (keyCode === 39) {
       this.players[0].dirx = 1;
     }
     // UP
@@ -96,7 +106,7 @@ class Game {
       this.players[0].diry = -1;
     }
     // DOWN
-    if (keyCode === 40) {
+    else if (keyCode === 40) {
       this.players[0].diry = 1;
     }
   }
